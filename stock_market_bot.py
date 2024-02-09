@@ -47,8 +47,9 @@ def stock(update, context):
         current_price = get_stock_price(company_name)
 
         quote_table = stock_info.get_quote_table(symbol)
+        quote_df = pd.DataFrame(quote_table)
 
-        previous_close_row = quote_table.append({'Attribute': 'Previous Close', 'Value': previous_close}, ignore_index=True)
+        previous_close_row = quote_df[quote_df['Attribute'] == 'Previous Close']
         previous_close = float(previous_close_row['Value'].iloc[0])
 
         percentage_change = ((current_price - previous_close) / previous_close) * 100
