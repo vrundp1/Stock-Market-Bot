@@ -47,30 +47,28 @@ def stock(update, context):
         current_price = get_stock_price(company_name)
 
         quote_table = stock_info.get_quote_table(symbol)
-        quote_df = pd.DataFrame(quote_table)
+        quote_df = pd.DataFrame(quote_table)  
 
         previous_close_row = quote_df[quote_df['Attribute'] == 'Previous Close']
         previous_close = float(previous_close_row['Value'].iloc[0])
 
         percentage_change = ((current_price - previous_close) / previous_close) * 100
+        day_low, day_high = map(float, quote_df.at[0, "Day's Range"].split(' - '))
 
-        day_range = quote_table['Day\'s Range'].iloc[-1]  # Use iloc for position-based access
-        day_low, day_high = map(float, day_range.split(' - '))
+        message_buffer = StringIO()
+        message_buffer.write(f"Company: {company_name}\n")
+        message_buffer.write(f"Current Price: ${current_price:.2f}\n")
+        message_buffer.write(f"Previous Close: ${previous_close:.2f}\n")
+        message_buffer.write(f"Percentage Change: {percentage_change:.2f}%\n")
+        message_buffer.write(f"Day's Range: ${day_low} - ${day_high}\n")
 
-        message = f"Company: {company_name}\n"\
-                  f"Current Price: ${current_price:.2f}\n"\
-                  f"Previous Close: ${previous_close:.2f}\n"\
-                  f"Percentage Change: {percentage_change:.2f}%\n"\
-                  f"Day's Range: ${day_low} - ${day_high}"
+        message = message_buffer.getvalue()
 
         send_message(update.message.chat_id, message)
 
-#For errors
     except Exception as e:
-
         error_message = f"Error fetching stock data for {company_name}: {str(e)}"
         send_message(update.message.chat_id, error_message)
-
 
 def main():
 
